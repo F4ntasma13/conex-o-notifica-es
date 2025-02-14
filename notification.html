@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #notifications {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: inline-block;
+            min-width: 300px;
+        }
+        .notification {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Notificações em Tempo Real</h2>
+    <div id="notifications"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (Notification.permission === "default") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        console.log("✅ Permissão concedida!");
+                    } else {
+                        console.warn("⚠️ Notificações bloqueadas pelo usuário.");
+                    }
+                });
+            }
+        });
+
+        const socket = new WebSocket("ws://localhost:8080");
+
+        socket.onopen = () => {
+            console.log("✅ Conectado ao WebSocket!");
+            socket.send(JSON.stringify({ type: "register_notification_client" }));
+        };
+
+        socket.onmessage = (event) => {
+            console.log("📩 Notificação recebida:", event.data);
+            const data = JSON.parse(event.data);
+
+            if (data.type === "notification") {
+                const notificationsDiv = document.getElementById("notifications");
+                const notification = document.createElement("div");
+                notification.className = "notification";
+                notification.innerText = data.content;
+                notificationsDiv.appendChild(notification);
+
+                if (Notification.permission === "granted") {
+                    const timestamp = new Date().toLocaleString();
+                    new Notification("📢 Novo Lead!", {
+                        body: `(${timestamp}) ${data.content}`,
+                        icon: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png",
+                        requireInteraction: true
+                    });
+                } else {
+                    console.warn("⚠️ Permissão para notificações negada.");
+                }
+            }
+        };
+
+        socket.onclose = () => console.log("❌ Desconectado do WebSocket!");
+        socket.onerror = (error) => console.error("⚠️ Erro no WebSocket:", error);
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
