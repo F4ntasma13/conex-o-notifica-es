@@ -14,30 +14,30 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            if (data.type === "lead_registration") {
+            if (data.type === "lead_registration" && data.leadData) {
                 console.log('🎯 Lead registrado:', data);
 
-                // Criando o objeto da notificação corretamente
-                const notificationData = {
+                const nome = data.leadData.nome || "Desconhecido";
+                const email = data.leadData.email || "Não informado";
+                const telefone = data.leadData.telefone || "Não informado";
+
+                const notification = {
                     type: "notification",
-                    content: `Novo lead cadastrado: ${data.nome || "Desconhecido"}`,
-                    leadData: {
-                        nome: data.nome || "Desconhecido",
-                        email: data.email || "Não informado",
-                        telefone: data.telefone || "Não informado"
-                    }
+                    content: `Novo lead cadastrado: ${nome}`,
+                    leadData: { nome, email, telefone }
                 };
 
-                console.log('📢 Notificação gerada:', notificationData);
+                console.log('📢 Notificação gerada:', notification);
 
-                // Enviar para todos os clientes conectados
                 clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify(notificationData));
+                        client.send(JSON.stringify(notification));
                     }
                 });
 
                 console.log('✅ Notificação enviada para todos os clientes.');
+            } else {
+                console.warn("⚠️ Dados do lead ausentes ou formato inválido:", data);
             }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
