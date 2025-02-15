@@ -20,7 +20,7 @@ wss.on('connection', (ws) => {
 
                 const nome = data.leadData.nome?.trim() || "Desconhecido";
                 const email = data.leadData.email?.trim() || "Não informado";
-                const telefone = data.leadData.telefone?.trim() || "Não informado";
+                const telefone = data.leadData.fone_celular?.trim() || "Não informado";
 
                 // Criar a notificação a ser enviada
                 const notification = {
