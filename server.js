@@ -20,13 +20,13 @@ wss.on('connection', (ws) => {
 
                 const nome = data.leadData.nome?.trim() || "Desconhecido";
                 const email = data.leadData.email?.trim() || "Não informado";
-                const telefone = data.leadData.fone_celular?.trim() || "Não informado";
+                const fone_celular = data.leadData.fone_celular?.trim() || "Não informado";
 
                 // Criar a notificação a ser enviada
                 const notification = {
                     type: "notification",
                     content: `Novo Lead cadastrado: ${nome}`,
-                    leadData: { nome, email, telefone }
+                    leadData: { nome, email, fone_celular }
                 };
 
                 console.log('📢 Notificação gerada:', notification);
