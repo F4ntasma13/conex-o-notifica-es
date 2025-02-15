@@ -22,7 +22,7 @@ wss.on('connection', (ws) => {
                     leadData: {
                         nome: data.leadData?.nome || "Desconhecido",
                         email: data.leadData?.email || "Não informado",
-                        telefone: data.leadData?.telefone || "Não informado",
+                        telefone: data.leadData?.fone_celular || "Não informado",
                     }
                 };
 
