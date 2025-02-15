@@ -14,20 +14,19 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            // Criar um objeto padrão se leadData estiver ausente
-            const leadData = data.leadData || {};
-            const nome = leadData.nome?.trim() || "Desconhecido";
-            const email = leadData.email?.trim() || "Não informado";
-            const telefone = leadData.telefone?.trim() || "Não informado";
-
-            if (data.type === "lead_registration" || data.type === "notification") {
+            // Aceita notificações ou registros de lead
+            if ((data.type === "lead_registration" || data.type === "notification") && data.leadData) {
                 console.log('🎯 Lead registrado:', data);
 
-                // Criar notificação
+                const nome = data.leadData.nome?.trim() || "Desconhecido";
+                const email = data.leadData.email?.trim() || "Não informado";
+                const fone_celular = data.leadData.fone_celular?.trim() || "Não informado";
+
+                // Criar a notificação a ser enviada
                 const notification = {
                     type: "notification",
                     content: `Novo Lead cadastrado: ${nome}`,
-                    leadData: { nome, email, telefone }
+                    leadData: { nome, email, fone_celular }
                 };
 
                 console.log('📢 Notificação gerada:', notification);
@@ -41,7 +40,7 @@ wss.on('connection', (ws) => {
 
                 console.log('✅ Notificação enviada para todos os clientes.');
             } else {
-                console.warn("⚠️ Tipo de mensagem desconhecido:", data);
+                console.warn("⚠️ Dados do lead ausentes ou formato inválido:", data);
             }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
@@ -55,7 +54,6 @@ wss.on('connection', (ws) => {
 });
 
 console.log('🚀 Servidor WebSocket rodando na porta 8080');
-
 
 
 
