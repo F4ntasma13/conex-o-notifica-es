@@ -21,7 +21,7 @@ wss.on('connection', (ws) => {
 
             const notification = {
                 type: "notification",
-                content: "Novo lead cadastrado: ${nome}",
+                content: "Novo lead cadastrado: " {nome},
                 leadData: { nome, email, telefone }
             };
 
