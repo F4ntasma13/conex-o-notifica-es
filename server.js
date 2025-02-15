@@ -14,35 +14,31 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            if (data.type === "lead_registration" && data.leadData) {
+            // Aceita notificações ou registros de lead
+            if ((data.type === "lead_registration" || data.type === "notification") && data.leadData) {
                 console.log('🎯 Lead registrado:', data);
 
                 const nome = data.leadData.nome?.trim() || "Desconhecido";
                 const email = data.leadData.email?.trim() || "Não informado";
+                const telefone = data.leadData.telefone?.trim() || "Não informado";
 
+                // Criar a notificação a ser enviada
+                const notification = {
+                    type: "notification",
+                    content: `Novo Lead cadastrado: ${nome}`,
+                    leadData: { nome, email, telefone }
+                };
 
-                // Verifica se pelo menos um dos dados é válido
-                const dadosValidos = nome !== "Desconhecido" || email !== "Não informado";
+                console.log('📢 Notificação gerada:', notification);
 
-                if (dadosValidos) {
-                    const notification = {
-                        type: "notification",
-                        content: `Novo lead cadastrado: ${nome}`,
-                        leadData: { nome, email }
-                    };
+                // Enviar para todos os clientes conectados
+                clients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(notification));
+                    }
+                });
 
-                    console.log('📢 Notificação gerada:', notification);
-
-                    clients.forEach(client => {
-                        if (client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify(notification));
-                        }
-                    });
-
-                    console.log('✅ Notificação enviada para todos os clientes.');
-                } else {
-                    console.warn("⚠️ Notificação ignorada: Nenhum dado válido foi enviado.");
-                }
+                console.log('✅ Notificação enviada para todos os clientes.');
             } else {
                 console.warn("⚠️ Dados do lead ausentes ou formato inválido:", data);
             }
