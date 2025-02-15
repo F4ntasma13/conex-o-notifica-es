@@ -19,16 +19,16 @@ wss.on('connection', (ws) => {
 
                 const nome = data.leadData.nome?.trim() || "Desconhecido";
                 const email = data.leadData.email?.trim() || "Não informado";
-                const telefone = data.leadData.telefone?.trim() || "Não informado";
+
 
                 // Verifica se pelo menos um dos dados é válido
-                const dadosValidos = nome !== "Desconhecido" || email !== "Não informado" || telefone !== "Não informado";
+                const dadosValidos = nome !== "Desconhecido" || email !== "Não informado";
 
                 if (dadosValidos) {
                     const notification = {
                         type: "notification",
                         content: `Novo lead cadastrado: ${nome}`,
-                        leadData: { nome, email, telefone }
+                        leadData: { nome, email }
                     };
 
                     console.log('📢 Notificação gerada:', notification);
