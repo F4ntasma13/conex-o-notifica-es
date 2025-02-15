@@ -14,19 +14,20 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            // Aceita notificações ou registros de lead
-            if ((data.type === "lead_registration" || data.type === "notification") || data.leadData) {
+            // Criar um objeto padrão se leadData estiver ausente
+            const leadData = data.leadData || {};
+            const nome = leadData.nome?.trim() || "Desconhecido";
+            const email = leadData.email?.trim() || "Não informado";
+            const telefone = leadData.telefone?.trim() || "Não informado";
+
+            if (data.type === "lead_registration" || data.type === "notification") {
                 console.log('🎯 Lead registrado:', data);
 
-                const nome = data.leadData.nome?.trim() || "Desconhecido";
-                const email = data.leadData.email?.trim() || "Não informado";
-                const fone_celular = data.leadData.fone_celular?.trim() || "Não informado";
-
-                // Criar a notificação a ser enviada
+                // Criar notificação
                 const notification = {
                     type: "notification",
                     content: `Novo Lead cadastrado: ${nome}`,
-                    leadData: { nome, email, fone_celular }
+                    leadData: { nome, email, telefone }
                 };
 
                 console.log('📢 Notificação gerada:', notification);
@@ -40,7 +41,7 @@ wss.on('connection', (ws) => {
 
                 console.log('✅ Notificação enviada para todos os clientes.');
             } else {
-                console.warn("⚠️ Dados do lead ausentes ou formato inválido:", data);
+                console.warn("⚠️ Tipo de mensagem desconhecido:", data);
             }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
