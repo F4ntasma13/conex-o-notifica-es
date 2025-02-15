@@ -17,7 +17,7 @@ wss.on('connection', (ws) => {
             // Garantindo que leadData sempre exista
             const nome = data.leadData?.nome || "Desconhecido";
             const email = data.leadData?.email || "Não informado";
-            const telefone = data.leadData?.telefone || "Não informado";
+            const telefone = data.leadData?.fone_celular || "Não informado";
 
             const notification = {
                 type: "notification",
