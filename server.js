@@ -15,7 +15,7 @@ wss.on('connection', (ws) => {
             const data = JSON.parse(message);
 
             // Aceita notificações ou registros de lead
-            if ((data.type === "lead_registration" || data.type === "notification") && data.leadData) {
+            if ((data.type === "lead_registration" || data.type === "notification") || data.leadData) {
                 console.log('🎯 Lead registrado:', data);
 
                 const nome = data.leadData.nome?.trim() || "Desconhecido";
