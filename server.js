@@ -14,28 +14,29 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            const nome = data.leadData?.nome || "Desconhecido";
-            const email = data.leadData?.email || "Não informado";
-            const telefone = data.leadData?.fone_celular || "Não informado";
-            
             if (data.type === "lead_registration") {
-                // Criando notificação única para todos os clientes conectados
-                const notification = {
+                // Garantindo que leadData sempre exista
+                const nome = data.leadData?.nome || "Desconhecido";
+                const email = data.leadData?.email || "Não informado";
+                const telefone = data.leadData?.telefone || "Não informado";
+
+                // Criando uma única notificação
+                const notification = JSON.stringify({
                     type: "notification",
                     content: `Novo lead cadastrado: ${nome}`,
-                    leadData: {email, telefone}
-                };
+                    leadData: { nome, email, telefone }
+                });
 
                 console.log('📢 Notificação gerada:', notification);
 
-                // Enviar a notificação para todos os clientes conectados
+                // Enviando apenas uma notificação para todos os clientes conectados
                 clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify(notification));
+                        client.send(notification);
                     }
                 });
 
-                console.log('✅ Notificação enviada para todos os clientes conectados.');
+                console.log('✅ Notificação enviada para todos os clientes.');
             }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
