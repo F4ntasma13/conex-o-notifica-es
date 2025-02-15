@@ -36,9 +36,7 @@ wss.on('connection', (ws) => {
                 });
 
                 console.log('✅ Notificação enviada para todos os clientes.');
-            } else {
-                console.warn("⚠️ Dados do lead ausentes ou formato inválido:", data);
-            }
+            } 
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
         }
