@@ -17,18 +17,23 @@ wss.on('connection', (ws) => {
             if (data.type === "lead_registration") {
                 console.log('Lead cadastrado.');
 
+                const notificationData = {
+                    type: "notification",
+                    content: `Novo lead cadastrado: ${data.nome}`,
+                    leadData: {
+                        nome: data.nome || "Desconhecido",
+                        email: data.email || "Não informado",
+                        telefone: data.telefone || "Não informado"
+                    }
+                };
+
                 clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
-                        client.send(
-                            JSON.stringify({
-                                type: "notification",
-                                content: `Novo lead cadastrado: ${data.nome}`
-                            })
-                        );
+                        client.send(JSON.stringify(notificationData));
                     }
                 });
 
-                console.log('✅ Notificação enviada para todos os clientes.');
+                console.log('✅ Notificação enviada para todos os clientes.', notificationData);
             }
         } catch (error) {
             console.error("Erro ao processar mensagem:", error);
@@ -42,4 +47,5 @@ wss.on('connection', (ws) => {
 });
 
 console.log('Servidor WebSocket rodando na porta 8080');
+
 
