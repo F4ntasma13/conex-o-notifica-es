@@ -14,26 +14,39 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            // Garantindo que leadData sempre exista
-            const nome = data.leadData?.nome || "Desconhecido";
-            const email = data.leadData?.email || "Não informado";
-            const telefone = data.leadData?.telefone || "Não informado";
+            if (!data || typeof data !== 'object') {
+                console.warn("⚠️ Dados recebidos inválidos:", data);
+                return;
+            }
 
-            const notification = {
-                type: "notification",
-                content: "Novo lead cadastrado: ",
-                leadData: { nome, email, telefone }
-            };
+            if (data.type === "lead_registration") {
+                // Verifica se leadData existe
+                const leadData = data.leadData ?? {};
+                
+                const nome = leadData.nome?.trim() || "Desconhecido";
+                const email = leadData.email?.trim() || "Não informado";
+                const telefone = leadData.telefone?.trim() || "Não informado";
 
-            console.log('📢 Notificação gerada:', notification);
+                console.log("🎯 Lead registrado:", leadData);
 
-            clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(notification));
-                }
-            });
+                // Criando uma única notificação
+                const notification = JSON.stringify({
+                    type: "notification",
+                    content: `Novo lead cadastrado: ${nome}`,
+                    leadData: { nome, email, telefone }
+                });
 
-            console.log('✅ Notificação enviada para todos os clientes.');
+                console.log('📢 Notificação gerada:', notification);
+
+                // Enviando a notificação para todos os clientes conectados
+                clients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(notification);
+                    }
+                });
+
+                console.log('✅ Notificação enviada para todos os clientes.');
+            }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
         }
@@ -44,6 +57,8 @@ wss.on('connection', (ws) => {
         clients.delete(ws);
     });
 });
+
+console.log('🚀 Servidor WebSocket rodando na porta 8080');
 
 
 
