@@ -14,16 +14,16 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
+            const nome = data.leadData?.nome || "Desconhecido";
+            const email = data.leadData?.email || "Não informado";
+            const telefone = data.leadData?.fone_celular || "Não informado";
+            
             if (data.type === "lead_registration") {
                 // Criando notificação única para todos os clientes conectados
                 const notification = {
                     type: "notification",
-                    content: `Novo lead cadastrado: ${data.leadData?.nome || "Desconhecido"}`,
-                    leadData: {
-                        nome: data.leadData?.nome || "Desconhecido",
-                        email: data.leadData?.email || "Não informado",
-                        telefone: data.leadData?.fone_celular || "Não informado",
-                    }
+                    content: `Novo lead cadastrado: ${nome}`,
+                    leadData: {email, telefone}
                 };
 
                 console.log('📢 Notificação gerada:', notification);
