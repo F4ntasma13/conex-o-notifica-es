@@ -14,39 +14,38 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
 
-            // Garantir que a mensagem seja do tipo correto
-            if (!data || typeof data !== 'object' || data.type !== "lead_registration") {
-                console.warn("⚠️ Mensagem ignorada. Tipo inválido ou dados corrompidos:", data);
-                return;
-            }
+            if (data.type === "lead_registration" && data.leadData) {
+                console.log('🎯 Lead registrado:', data);
 
-            console.log("🎯 Lead registrado:", JSON.stringify(data, null, 2));
+                const nome = data.leadData.nome?.trim() || "Desconhecido";
+                const email = data.leadData.email?.trim() || "Não informado";
+                const telefone = data.leadData.telefone?.trim() || "Não informado";
 
-            // Verifica se leadData está presente
-            const leadData = data.leadData ?? {};
+                // Verifica se pelo menos um dos dados é válido
+                const dadosValidos = nome !== "Desconhecido" || email !== "Não informado" || telefone !== "Não informado";
 
-            // Garantir que os dados tenham valores válidos
-            const nome = leadData.nome?.trim() || "Desconhecido";
-            const email = leadData.email?.trim() || "Não informado";
-            const telefone = leadData.telefone?.trim() || "Não informado";
+                if (dadosValidos) {
+                    const notification = {
+                        type: "notification",
+                        content: `Novo lead cadastrado: ${nome}`,
+                        leadData: { nome, email, telefone }
+                    };
 
-            // Criando uma única notificação
-            const notification = {
-                type: "notification",
-                content: `Novo lead cadastrado: ${nome}`,
-                leadData: { nome, email, telefone }
-            };
+                    console.log('📢 Notificação gerada:', notification);
 
-            console.log('📢 Notificação gerada:', JSON.stringify(notification, null, 2));
+                    clients.forEach(client => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify(notification));
+                        }
+                    });
 
-            // Enviar notificação para todos os clientes conectados **uma única vez**
-            clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(notification));
+                    console.log('✅ Notificação enviada para todos os clientes.');
+                } else {
+                    console.warn("⚠️ Notificação ignorada: Nenhum dado válido foi enviado.");
                 }
-            });
-
-            console.log('✅ Notificação enviada para todos os clientes conectados.');
+            } else {
+                console.warn("⚠️ Dados do lead ausentes ou formato inválido:", data);
+            }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
         }
@@ -59,6 +58,7 @@ wss.on('connection', (ws) => {
 });
 
 console.log('🚀 Servidor WebSocket rodando na porta 8080');
+
 
 
 
