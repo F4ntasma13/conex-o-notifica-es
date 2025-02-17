@@ -18,10 +18,10 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         console.log('📩 Mensagem recebida:', message);
 
-        if (data.type === "ping") return; // Ignorar mensagens de "ping"
-
         try {
             const data = JSON.parse(message);
+
+            if (data.type === "ping") return; // Ignorar mensagens de "ping"
 
             // Aceita notificações ou registros de lead
             if ((data.type === "lead_registration" || data.type === "notification") && data.leadData) {
