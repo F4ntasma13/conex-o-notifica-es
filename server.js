@@ -8,8 +8,17 @@ wss.on('connection', (ws) => {
     console.log('✅ Novo cliente conectado!');
     clients.add(ws);
 
+    // Enviar "ping" para manter a conexão ativa
+    const pingInterval = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "ping" }));
+        }
+    }, 30000); // A cada 30 segundos
+
     ws.on('message', (message) => {
         console.log('📩 Mensagem recebida:', message);
+
+        if (data.type === "ping") return; // Ignorar mensagens de "ping"
 
         try {
             const data = JSON.parse(message);
@@ -50,6 +59,7 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log('❌ Cliente desconectado');
         clients.delete(ws);
+        clearInterval(pingInterval); // Limpar intervalo quando o cliente desconectar
     });
 });
 
