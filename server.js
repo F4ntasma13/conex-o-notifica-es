@@ -8,10 +8,10 @@ wss.on("connection", (ws) => {
     console.log("✅ Novo cliente conectado!");
     clients.add(ws);
 
-    // Configurar o envio de pings periódicos
+    // Enviar "ping" para manter a conexão ativa
     const pingInterval = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
-            ws.ping();
+            ws.send(JSON.stringify({ type: "ping" }));
             console.log("📡 Ping enviado ao cliente.");
         }
     }, 30000); // A cada 30 segundos
@@ -21,6 +21,8 @@ wss.on("connection", (ws) => {
 
         try {
             const data = JSON.parse(message);
+
+            if (data.type === "ping") return; // Ignorar mensagens de "ping"
 
             if ((data.type === "lead_registration" || data.type === "notification") && data.leadData) {
                 console.log("🎯 Lead registrado:", data);
@@ -54,24 +56,20 @@ wss.on("connection", (ws) => {
 
     ws.on("close", () => {
         console.log("❌ Cliente desconectado");
-        clearInterval(pingInterval);
         clients.delete(ws);
-    });
-
-    ws.on("pong", () => {
-        console.log("📡 Pong recebido do cliente.");
+        clearInterval(pingInterval);
     });
 });
 
-// Mantendo o servidor WebSocket ativo no Render
+// 🚀 Evita que o servidor hiberne no Render
 setInterval(() => {
-    console.log("⏳ Enviando Keep-Alive para evitar hibernação...");
+    console.log("⏳ Enviando Keep-Alive...");
     fetch("https://conex-o-notifica-es.onrender.com")
         .then(() => console.log("✅ Keep-Alive enviado!"))
         .catch(() => console.warn("⚠️ Erro ao enviar Keep-Alive."));
 }, 60000); // A cada 1 minuto
 
-console.log("Servidor WebSocket rodando na porta 8080");
+console.log("🚀 Servidor WebSocket rodando na porta 8080");
 
 
 
