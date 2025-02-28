@@ -15,9 +15,6 @@ app.get("/", (req, res) => {
 wss.on("connection", (ws) => {
     console.log("✅ Novo cliente conectado!");
     clients.add(ws);
-wss.on("connection", (ws) => {
-    console.log("✅ Novo cliente conectado!");
-    clients.add(ws);
 
     ws.on("message", (message) => {
         console.log("📩 Mensagem recebida:", message);
@@ -52,7 +49,6 @@ wss.on("connection", (ws) => {
             }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
-            console.error("❌ Erro ao processar mensagem:", error);
         }
     });
 
@@ -68,4 +64,3 @@ server.listen(PORT, "0.0.0.0", () => {
     console.log(`ws://localhost:${PORT}`);
     console.log(`ws://192.168.1.2:${PORT} (acesso na rede local)`);
 });
-
