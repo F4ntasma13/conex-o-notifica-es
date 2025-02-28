@@ -1,28 +1,29 @@
+const express = require("express");
+const http = require("http");
 const WebSocket = require("ws");
 
-const wss = new WebSocket.Server({ port: 8080 });
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 let clients = new Set();
+
+app.get("/", (req, res) => {
+    res.send("Servidor WebSocket rodando com Express!");
+});
 
 wss.on("connection", (ws) => {
     console.log("✅ Novo cliente conectado!");
     clients.add(ws);
-
-    // Enviar "ping" para manter a conexão ativa
-    const pingInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: "ping" }));
-            console.log("📡 Ping enviado ao cliente.");
-        }
-    }, 30000); // A cada 30 segundos
+wss.on("connection", (ws) => {
+    console.log("✅ Novo cliente conectado!");
+    clients.add(ws);
 
     ws.on("message", (message) => {
         console.log("📩 Mensagem recebida:", message);
 
         try {
             const data = JSON.parse(message);
-
-            if (data.type === "ping") return; // Ignorar mensagens de "ping"
 
             if ((data.type === "lead_registration" || data.type === "notification") && data.leadData) {
                 console.log("🎯 Lead registrado:", data);
@@ -51,27 +52,20 @@ wss.on("connection", (ws) => {
             }
         } catch (error) {
             console.error("❌ Erro ao processar mensagem:", error);
+            console.error("❌ Erro ao processar mensagem:", error);
         }
     });
 
     ws.on("close", () => {
         console.log("❌ Cliente desconectado");
         clients.delete(ws);
-        clearInterval(pingInterval);
     });
 });
 
-// 🚀 Evita que o servidor hiberne no Render
-setInterval(() => {
-    console.log("⏳ Enviando Keep-Alive...");
-    fetch("https://conex-o-notifica-es.onrender.com")
-        .then(() => console.log("✅ Keep-Alive enviado!"))
-        .catch(() => console.warn("⚠️ Erro ao enviar Keep-Alive."));
-}, 60000); // A cada 1 minuto
-
-console.log("🚀 Servidor WebSocket rodando na porta 8080");
-
-
-
-
+const PORT = 8080;
+server.listen(PORT, "0.0.0.0", () => {
+    console.log("Servidor Express rodando em:");
+    console.log(`ws://localhost:${PORT}`);
+    console.log(`ws://192.168.1.2:${PORT} (acesso na rede local)`);
+});
 
